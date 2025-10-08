@@ -1,0 +1,31 @@
+# Maven build
+/target/
+/bin/
+
+# VS Code
+.vscode/
+*.code-workspace
+
+# IntelliJ IDEA
+*.iml
+*.iws
+.idea/
+
+# Eclipse
+.project
+.classpath
+.settings/
+
+# Generated ANTLR files (optional if you want to commit them)
+/src/main/java/grammar/*.java
+/src/main/java/grammar/*.interp
+/src/main/java/grammar/*.tokens
+
+# MacOS
+.DS_Store
+
+# Logs
+*.log
+
+# Compiled class files (if accidentally outside target/)
+*.class

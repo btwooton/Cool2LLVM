@@ -1,0 +1,126 @@
+[INFO] Scanning for projects...
+[INFO] 
+[INFO] -------------------------< compiler:Cool2LLVM >-------------------------
+[INFO] Building Cool2LLVM 1.0-SNAPSHOT
+[INFO]   from pom.xml
+[INFO] --------------------------------[ jar ]---------------------------------
+[INFO] 
+[INFO] --- clean:3.2.0:clean (default-clean) @ Cool2LLVM ---
+[INFO] Deleting /Users/troy/Cool2LLVM/Cool2LLVM/target
+[INFO] 
+[INFO] --- antlr4:4.13.2:antlr4 (default) @ Cool2LLVM ---
+[INFO] No ANTLR 4 grammars to compile in /Users/troy/Cool2LLVM/Cool2LLVM/src/main/antlr4
+[INFO] 
+[INFO] --- resources:3.3.1:resources (default-resources) @ Cool2LLVM ---
+[INFO] skip non existing resourceDirectory /Users/troy/Cool2LLVM/Cool2LLVM/src/main/resources
+[INFO] 
+[INFO] --- compiler:3.11.0:compile (default-compile) @ Cool2LLVM ---
+[INFO] Changes detected - recompiling the module! :source
+[INFO] Compiling 29 source files with javac [debug release 17] to target/classes
+[INFO] -------------------------------------------------------------
+[ERROR] COMPILATION ERROR : 
+[INFO] -------------------------------------------------------------
+[ERROR] /Users/troy/Cool2LLVM/Cool2LLVM/src/main/java/compiler/visitors/CoolParserToASTVisitor.java:[79,23] visitLtExpr(grammar.CoolParser.LtExprContext) in compiler.visitors.CoolParserToASTVisitor cannot implement visitLtExpr(grammar.CoolParser.LtExprContext) in grammar.CoolParserVisitor
+  attempting to assign weaker access privileges; was public
+[ERROR] /Users/troy/Cool2LLVM/Cool2LLVM/src/main/java/compiler/visitors/CoolParserToASTVisitor.java:[21,71] cannot find symbol
+  symbol:   variable left
+  location: variable ctx of type grammar.CoolParser.MultExprContext
+[ERROR] /Users/troy/Cool2LLVM/Cool2LLVM/src/main/java/compiler/visitors/CoolParserToASTVisitor.java:[22,72] cannot find symbol
+  symbol:   variable right
+  location: variable ctx of type grammar.CoolParser.MultExprContext
+[ERROR] /Users/troy/Cool2LLVM/Cool2LLVM/src/main/java/compiler/visitors/CoolParserToASTVisitor.java:[33,71] cannot find symbol
+  symbol:   variable left
+  location: variable ctx of type grammar.CoolParser.PlusExprContext
+[ERROR] /Users/troy/Cool2LLVM/Cool2LLVM/src/main/java/compiler/visitors/CoolParserToASTVisitor.java:[34,72] cannot find symbol
+  symbol:   variable right
+  location: variable ctx of type grammar.CoolParser.PlusExprContext
+[ERROR] /Users/troy/Cool2LLVM/Cool2LLVM/src/main/java/compiler/visitors/CoolParserToASTVisitor.java:[45,71] cannot find symbol
+  symbol:   variable left
+  location: variable ctx of type grammar.CoolParser.MinusExprContext
+[ERROR] /Users/troy/Cool2LLVM/Cool2LLVM/src/main/java/compiler/visitors/CoolParserToASTVisitor.java:[46,72] cannot find symbol
+  symbol:   variable right
+  location: variable ctx of type grammar.CoolParser.MinusExprContext
+[ERROR] /Users/troy/Cool2LLVM/Cool2LLVM/src/main/java/compiler/visitors/CoolParserToASTVisitor.java:[57,71] cannot find symbol
+  symbol:   variable left
+  location: variable ctx of type grammar.CoolParser.DivExprContext
+[ERROR] /Users/troy/Cool2LLVM/Cool2LLVM/src/main/java/compiler/visitors/CoolParserToASTVisitor.java:[58,72] cannot find symbol
+  symbol:   variable right
+  location: variable ctx of type grammar.CoolParser.DivExprContext
+[ERROR] /Users/troy/Cool2LLVM/Cool2LLVM/src/main/java/compiler/visitors/CoolParserToASTVisitor.java:[69,71] cannot find symbol
+  symbol:   variable left
+  location: variable ctx of type grammar.CoolParser.EqExprContext
+[ERROR] /Users/troy/Cool2LLVM/Cool2LLVM/src/main/java/compiler/visitors/CoolParserToASTVisitor.java:[70,72] cannot find symbol
+  symbol:   variable right
+  location: variable ctx of type grammar.CoolParser.EqExprContext
+[ERROR] /Users/troy/Cool2LLVM/Cool2LLVM/src/main/java/compiler/visitors/CoolParserToASTVisitor.java:[80,71] cannot find symbol
+  symbol:   variable left
+  location: variable ctx of type grammar.CoolParser.LtExprContext
+[ERROR] /Users/troy/Cool2LLVM/Cool2LLVM/src/main/java/compiler/visitors/CoolParserToASTVisitor.java:[81,72] cannot find symbol
+  symbol:   variable right
+  location: variable ctx of type grammar.CoolParser.LtExprContext
+[ERROR] /Users/troy/Cool2LLVM/Cool2LLVM/src/main/java/compiler/visitors/CoolParserToASTVisitor.java:[92,71] cannot find symbol
+  symbol:   variable left
+  location: variable ctx of type grammar.CoolParser.LeExprContext
+[ERROR] /Users/troy/Cool2LLVM/Cool2LLVM/src/main/java/compiler/visitors/CoolParserToASTVisitor.java:[93,72] cannot find symbol
+  symbol:   variable right
+  location: variable ctx of type grammar.CoolParser.LeExprContext
+[INFO] 15 errors 
+[INFO] -------------------------------------------------------------
+[INFO] ------------------------------------------------------------------------
+[INFO] BUILD FAILURE
+[INFO] ------------------------------------------------------------------------
+[INFO] Total time:  0.666 s
+[INFO] Finished at: 2025-10-07T19:13:57-10:00
+[INFO] ------------------------------------------------------------------------
+[ERROR] Failed to execute goal org.apache.maven.plugins:maven-compiler-plugin:3.11.0:compile (default-compile) on project Cool2LLVM: Compilation failure: Compilation failure: 
+[ERROR] /Users/troy/Cool2LLVM/Cool2LLVM/src/main/java/compiler/visitors/CoolParserToASTVisitor.java:[79,23] visitLtExpr(grammar.CoolParser.LtExprContext) in compiler.visitors.CoolParserToASTVisitor cannot implement visitLtExpr(grammar.CoolParser.LtExprContext) in grammar.CoolParserVisitor
+[ERROR]   attempting to assign weaker access privileges; was public
+[ERROR] /Users/troy/Cool2LLVM/Cool2LLVM/src/main/java/compiler/visitors/CoolParserToASTVisitor.java:[21,71] cannot find symbol
+[ERROR]   symbol:   variable left
+[ERROR]   location: variable ctx of type grammar.CoolParser.MultExprContext
+[ERROR] /Users/troy/Cool2LLVM/Cool2LLVM/src/main/java/compiler/visitors/CoolParserToASTVisitor.java:[22,72] cannot find symbol
+[ERROR]   symbol:   variable right
+[ERROR]   location: variable ctx of type grammar.CoolParser.MultExprContext
+[ERROR] /Users/troy/Cool2LLVM/Cool2LLVM/src/main/java/compiler/visitors/CoolParserToASTVisitor.java:[33,71] cannot find symbol
+[ERROR]   symbol:   variable left
+[ERROR]   location: variable ctx of type grammar.CoolParser.PlusExprContext
+[ERROR] /Users/troy/Cool2LLVM/Cool2LLVM/src/main/java/compiler/visitors/CoolParserToASTVisitor.java:[34,72] cannot find symbol
+[ERROR]   symbol:   variable right
+[ERROR]   location: variable ctx of type grammar.CoolParser.PlusExprContext
+[ERROR] /Users/troy/Cool2LLVM/Cool2LLVM/src/main/java/compiler/visitors/CoolParserToASTVisitor.java:[45,71] cannot find symbol
+[ERROR]   symbol:   variable left
+[ERROR]   location: variable ctx of type grammar.CoolParser.MinusExprContext
+[ERROR] /Users/troy/Cool2LLVM/Cool2LLVM/src/main/java/compiler/visitors/CoolParserToASTVisitor.java:[46,72] cannot find symbol
+[ERROR]   symbol:   variable right
+[ERROR]   location: variable ctx of type grammar.CoolParser.MinusExprContext
+[ERROR] /Users/troy/Cool2LLVM/Cool2LLVM/src/main/java/compiler/visitors/CoolParserToASTVisitor.java:[57,71] cannot find symbol
+[ERROR]   symbol:   variable left
+[ERROR]   location: variable ctx of type grammar.CoolParser.DivExprContext
+[ERROR] /Users/troy/Cool2LLVM/Cool2LLVM/src/main/java/compiler/visitors/CoolParserToASTVisitor.java:[58,72] cannot find symbol
+[ERROR]   symbol:   variable right
+[ERROR]   location: variable ctx of type grammar.CoolParser.DivExprContext
+[ERROR] /Users/troy/Cool2LLVM/Cool2LLVM/src/main/java/compiler/visitors/CoolParserToASTVisitor.java:[69,71] cannot find symbol
+[ERROR]   symbol:   variable left
+[ERROR]   location: variable ctx of type grammar.CoolParser.EqExprContext
+[ERROR] /Users/troy/Cool2LLVM/Cool2LLVM/src/main/java/compiler/visitors/CoolParserToASTVisitor.java:[70,72] cannot find symbol
+[ERROR]   symbol:   variable right
+[ERROR]   location: variable ctx of type grammar.CoolParser.EqExprContext
+[ERROR] /Users/troy/Cool2LLVM/Cool2LLVM/src/main/java/compiler/visitors/CoolParserToASTVisitor.java:[80,71] cannot find symbol
+[ERROR]   symbol:   variable left
+[ERROR]   location: variable ctx of type grammar.CoolParser.LtExprContext
+[ERROR] /Users/troy/Cool2LLVM/Cool2LLVM/src/main/java/compiler/visitors/CoolParserToASTVisitor.java:[81,72] cannot find symbol
+[ERROR]   symbol:   variable right
+[ERROR]   location: variable ctx of type grammar.CoolParser.LtExprContext
+[ERROR] /Users/troy/Cool2LLVM/Cool2LLVM/src/main/java/compiler/visitors/CoolParserToASTVisitor.java:[92,71] cannot find symbol
+[ERROR]   symbol:   variable left
+[ERROR]   location: variable ctx of type grammar.CoolParser.LeExprContext
+[ERROR] /Users/troy/Cool2LLVM/Cool2LLVM/src/main/java/compiler/visitors/CoolParserToASTVisitor.java:[93,72] cannot find symbol
+[ERROR]   symbol:   variable right
+[ERROR]   location: variable ctx of type grammar.CoolParser.LeExprContext
+[ERROR] -> [Help 1]
+[ERROR] 
+[ERROR] To see the full stack trace of the errors, re-run Maven with the -e switch.
+[ERROR] Re-run Maven using the -X switch to enable full debug logging.
+[ERROR] 
+[ERROR] For more information about the errors and possible solutions, please read the following articles:
+[ERROR] [Help 1] http://cwiki.apache.org/confluence/display/MAVEN/MojoFailureException
