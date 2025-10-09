@@ -16,6 +16,36 @@ public class CoolParserToASTVisitor extends CoolParserBaseVisitor<ASTNode> {
     }
 
     @Override
+    public ASTNode visitStringLiteralExpr(grammar.CoolParser.StringLiteralExprContext ctx) {
+        // Remove the surrounding quotes from the string literal
+        String text = ctx.getStart().getText();
+        String value = text.substring(1, text.length() - 1);
+        return new compiler.ast.LiteralExprNode(
+            ctx.getStart().getLine(),
+            compiler.ast.LiteralExprNode.LiteralType.STRING,
+            value
+        );
+    }
+
+    @Override
+    public ASTNode visitFalseLiteralExpr(grammar.CoolParser.FalseLiteralExprContext ctx) {
+        return new compiler.ast.LiteralExprNode(
+            ctx.getStart().getLine(),
+            compiler.ast.LiteralExprNode.LiteralType.BOOL,
+            false
+        );
+    }
+
+    @Override
+    public ASTNode visitTrueLiteralExpr(grammar.CoolParser.TrueLiteralExprContext ctx) {
+        return new compiler.ast.LiteralExprNode(
+            ctx.getStart().getLine(),
+            compiler.ast.LiteralExprNode.LiteralType.BOOL,
+            true
+        );
+    }
+
+    @Override
     public ASTNode visitMultExpr(grammar.CoolParser.MultExprContext ctx) {
         compiler.ast.ExprNode left = (compiler.ast.ExprNode) visit(ctx.getChild(0));
         compiler.ast.ExprNode right = (compiler.ast.ExprNode) visit(ctx.getChild(2));
@@ -96,6 +126,14 @@ public class CoolParserToASTVisitor extends CoolParserBaseVisitor<ASTNode> {
             compiler.ast.BinaryOpExprNode.Op.LE,
             left,
             right
+        );
+    }
+
+    @Override
+    public ASTNode visitParenExpr(grammar.CoolParser.ParenExprContext ctx) {
+        return new compiler.ast.ParenExprNode(
+            ctx.getStart().getLine(),
+            (compiler.ast.ExprNode) visit(ctx.getChild(1))
         );
     }
     

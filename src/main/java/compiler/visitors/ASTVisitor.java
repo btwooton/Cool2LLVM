@@ -19,4 +19,5 @@ public interface ASTVisitor<T> {
     T visitUnaryOpExpr(UnaryOpExprNode node);
     T visitIdentifierExpr(IdentifierExprNode node);
     T visitLiteralExpr(LiteralExprNode node);
+    T visitParenExpr(ParenExprNode node);
 }
