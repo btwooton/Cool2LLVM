@@ -136,5 +136,23 @@ public class CoolParserToASTVisitor extends CoolParserBaseVisitor<ASTNode> {
             (compiler.ast.ExprNode) visit(ctx.getChild(1))
         );
     }
+
+    @Override
+    public ASTNode visitComplementExpr(grammar.CoolParser.ComplementExprContext ctx) {
+        return new compiler.ast.UnaryOpExprNode(
+            ctx.getStart().getLine(),
+            compiler.ast.UnaryOpExprNode.Op.COMP,
+            (compiler.ast.ExprNode) visit(ctx.getChild(1))
+        );
+    }
+
+    @Override
+    public ASTNode visitNotExpr(grammar.CoolParser.NotExprContext ctx) {
+        return new compiler.ast.UnaryOpExprNode(
+            ctx.getStart().getLine(),
+            compiler.ast.UnaryOpExprNode.Op.NOT,
+            (compiler.ast.ExprNode) visit(ctx.getChild(1))
+        );
+    }
     
 }

@@ -103,4 +103,37 @@ public class CoolParserToASTVisitorTest {
         assertEquals(4, ((LiteralExprNode) rightBin.left).value);
         assertEquals(5, ((LiteralExprNode) rightBin.right).value);
     }
+
+    @Test
+    public void testUnaryOpExprs() {
+        // Given: You parse the following Cool expression
+        CoolParser.ExprContext ctx = CoolTestUtils.parseExpr("not false");
+        // When: You visit the parse tree with your CoolParserToASTVisitor
+        CoolParserToASTVisitor visitor = new CoolParserToASTVisitor();
+        ASTNode node = visitor.visit(ctx);
+        // Then: You get a UnaryOpExprNode with Op.NOT
+        assertTrue(node instanceof UnaryOpExprNode);
+        UnaryOpExprNode unary = (UnaryOpExprNode) node;
+        assertEquals(UnaryOpExprNode.Op.NOT, unary.operator);
+        // Then: The inner expression is a LiteralExprNode with boolean value false
+        assertTrue(unary.expr instanceof LiteralExprNode);
+        LiteralExprNode lit = (LiteralExprNode) unary.expr;
+        assertEquals(LiteralExprNode.LiteralType.BOOL, lit.type);
+        assertEquals(false, lit.value);
+
+        // Given: You parse the following Cool expression
+        ctx = CoolTestUtils.parseExpr("~10075");
+        // When: You visit the parse tree with your CoolParserToASTVisitor
+        node = visitor.visit(ctx);
+        // Then: You get a UnaryOpExprNode with Op.COMP
+        assertTrue(node instanceof UnaryOpExprNode);
+        unary = (UnaryOpExprNode) node;
+        assertEquals(UnaryOpExprNode.Op.COMP, unary.operator);
+        // Then: The inner expression is a LiteralExprNode with integer value 10075
+        assertTrue(unary.expr instanceof LiteralExprNode);
+        lit = (LiteralExprNode) unary.expr;
+        assertEquals(LiteralExprNode.LiteralType.INT, lit.type);
+        assertEquals(10075, lit.value);
+
+    }
 }
