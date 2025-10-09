@@ -47,8 +47,8 @@ public class CoolParserToASTVisitor extends CoolParserBaseVisitor<ASTNode> {
 
     @Override
     public ASTNode visitMultExpr(grammar.CoolParser.MultExprContext ctx) {
-        compiler.ast.ExprNode left = (compiler.ast.ExprNode) visit(ctx.getChild(0));
-        compiler.ast.ExprNode right = (compiler.ast.ExprNode) visit(ctx.getChild(2));
+        compiler.ast.ExprNode left = (compiler.ast.ExprNode) visit(ctx.left);
+        compiler.ast.ExprNode right = (compiler.ast.ExprNode) visit(ctx.right);
         return new compiler.ast.BinaryOpExprNode(
             ctx.getStart().getLine(),
             compiler.ast.BinaryOpExprNode.Op.MUL,
@@ -59,8 +59,8 @@ public class CoolParserToASTVisitor extends CoolParserBaseVisitor<ASTNode> {
 
     @Override
     public ASTNode visitPlusExpr(grammar.CoolParser.PlusExprContext ctx) {
-        compiler.ast.ExprNode left = (compiler.ast.ExprNode) visit(ctx.getChild(0));
-        compiler.ast.ExprNode right = (compiler.ast.ExprNode) visit(ctx.getChild(2));
+        compiler.ast.ExprNode left = (compiler.ast.ExprNode) visit(ctx.left);
+        compiler.ast.ExprNode right = (compiler.ast.ExprNode) visit(ctx.right);
         return new compiler.ast.BinaryOpExprNode(
             ctx.getStart().getLine(),
             compiler.ast.BinaryOpExprNode.Op.ADD,
@@ -71,8 +71,8 @@ public class CoolParserToASTVisitor extends CoolParserBaseVisitor<ASTNode> {
 
     @Override
     public ASTNode visitMinusExpr(grammar.CoolParser.MinusExprContext ctx) {
-        compiler.ast.ExprNode left = (compiler.ast.ExprNode) visit(ctx.getChild(0));
-        compiler.ast.ExprNode right = (compiler.ast.ExprNode) visit(ctx.getChild(2));
+        compiler.ast.ExprNode left = (compiler.ast.ExprNode) visit(ctx.left);
+        compiler.ast.ExprNode right = (compiler.ast.ExprNode) visit(ctx.right);
         return new compiler.ast.BinaryOpExprNode(
             ctx.getStart().getLine(),
             compiler.ast.BinaryOpExprNode.Op.SUB,
@@ -83,8 +83,8 @@ public class CoolParserToASTVisitor extends CoolParserBaseVisitor<ASTNode> {
 
     @Override
     public ASTNode visitDivExpr(grammar.CoolParser.DivExprContext ctx) {
-        compiler.ast.ExprNode left = (compiler.ast.ExprNode) visit(ctx.getChild(0));
-        compiler.ast.ExprNode right = (compiler.ast.ExprNode) visit(ctx.getChild(2));
+        compiler.ast.ExprNode left = (compiler.ast.ExprNode) visit(ctx.left);
+        compiler.ast.ExprNode right = (compiler.ast.ExprNode) visit(ctx.right);
         return new compiler.ast.BinaryOpExprNode(
             ctx.getStart().getLine(),
             compiler.ast.BinaryOpExprNode.Op.DIV,
@@ -95,8 +95,8 @@ public class CoolParserToASTVisitor extends CoolParserBaseVisitor<ASTNode> {
 
     @Override 
     public ASTNode visitEqExpr(grammar.CoolParser.EqExprContext ctx) {
-        compiler.ast.ExprNode left = (compiler.ast.ExprNode) visit(ctx.getChild(0));
-        compiler.ast.ExprNode right = (compiler.ast.ExprNode) visit(ctx.getChild(2));
+        compiler.ast.ExprNode left = (compiler.ast.ExprNode) visit(ctx.left);
+        compiler.ast.ExprNode right = (compiler.ast.ExprNode) visit(ctx.right);
         return new compiler.ast.BinaryOpExprNode(
             ctx.getStart().getLine(),
             compiler.ast.BinaryOpExprNode.Op.EQ,
@@ -107,8 +107,8 @@ public class CoolParserToASTVisitor extends CoolParserBaseVisitor<ASTNode> {
 
     @Override 
     public ASTNode visitLtExpr(grammar.CoolParser.LtExprContext ctx) {
-        compiler.ast.ExprNode left = (compiler.ast.ExprNode) visit(ctx.getChild(0));
-        compiler.ast.ExprNode right = (compiler.ast.ExprNode) visit(ctx.getChild(2));
+        compiler.ast.ExprNode left = (compiler.ast.ExprNode) visit(ctx.left);
+        compiler.ast.ExprNode right = (compiler.ast.ExprNode) visit(ctx.right);
         return new compiler.ast.BinaryOpExprNode(
             ctx.getStart().getLine(),
             compiler.ast.BinaryOpExprNode.Op.LT,
@@ -119,8 +119,8 @@ public class CoolParserToASTVisitor extends CoolParserBaseVisitor<ASTNode> {
 
     @Override 
     public ASTNode visitLeExpr(grammar.CoolParser.LeExprContext ctx) {
-        compiler.ast.ExprNode left = (compiler.ast.ExprNode) visit(ctx.getChild(0));
-        compiler.ast.ExprNode right = (compiler.ast.ExprNode) visit(ctx.getChild(2));
+        compiler.ast.ExprNode left = (compiler.ast.ExprNode) visit(ctx.left);
+        compiler.ast.ExprNode right = (compiler.ast.ExprNode) visit(ctx.right);
         return new compiler.ast.BinaryOpExprNode(
             ctx.getStart().getLine(),
             compiler.ast.BinaryOpExprNode.Op.LE,
