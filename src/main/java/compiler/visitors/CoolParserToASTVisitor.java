@@ -161,5 +161,12 @@ public class CoolParserToASTVisitor extends CoolParserBaseVisitor<ASTNode> {
             ctx.getText()
         );
     }
+
+    @Override public ASTNode visitIsvoidExpr(grammar.CoolParser.IsvoidExprContext ctx) {
+        return new compiler.ast.IsVoidExprNode(
+            ctx.getStart().getLine(),
+            (compiler.ast.ExprNode) visit(ctx.getChild(1))
+        );
+    }
     
 }

@@ -149,4 +149,20 @@ public class CoolParserToASTVisitorTest {
         IdentifierExprNode id = (IdentifierExprNode) node;
         assertEquals("myVar", id.name);
     }
+
+    @Test
+    public void testIsVoidExpr() {
+        // Given: You parse the following Cool expression containing an isvoid operation
+        CoolParser.ExprContext ctx = CoolTestUtils.parseExpr("isvoid myVar");
+        // When: You visit the parse tree with your CoolParserToASTVisitor
+        CoolParserToASTVisitor visitor = new CoolParserToASTVisitor();
+        ASTNode node = visitor.visit(ctx);
+        // Then: You get an IsVoidExprNode
+        assertTrue(node instanceof IsVoidExprNode);
+        IsVoidExprNode isvoid = (IsVoidExprNode) node;
+        // Then: The inner expression is an IdentifierExprNode with the correct name
+        assertTrue(isvoid.expr instanceof IdentifierExprNode);
+        IdentifierExprNode id = (IdentifierExprNode) isvoid.expr;
+        assertEquals("myVar", id.name);
+    }
 }
