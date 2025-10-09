@@ -165,4 +165,18 @@ public class CoolParserToASTVisitorTest {
         IdentifierExprNode id = (IdentifierExprNode) isvoid.expr;
         assertEquals("myVar", id.name);
     }
+
+    @Test
+    public void testNewExpr() {
+        // Given: You parse the following Cool expression containing a new operation
+        CoolParser.ExprContext ctx = CoolTestUtils.parseExpr("new MyClass");
+        // When: You visit the parse tree with your CoolParserToASTVisitor
+        CoolParserToASTVisitor visitor = new CoolParserToASTVisitor();
+        ASTNode node = visitor.visit(ctx);
+        // Then: You get a NewExprNode
+        assertTrue(node instanceof NewExprNode);
+        NewExprNode newExpr = (NewExprNode) node;
+        // Then: The typeName is correct
+        assertEquals("MyClass", newExpr.typeName);
+    }
 }
