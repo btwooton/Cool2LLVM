@@ -584,15 +584,17 @@ public class CoolParser extends Parser {
 	}
 	@SuppressWarnings("CheckReturnValue")
 	public static class LetExprContext extends ExprContext {
+		public Let_bindingContext let_binding;
+		public List<Let_bindingContext> let_bindings = new ArrayList<Let_bindingContext>();
 		public ExprContext body;
 		public TerminalNode LET() { return getToken(CoolParser.LET, 0); }
+		public TerminalNode IN() { return getToken(CoolParser.IN, 0); }
 		public List<Let_bindingContext> let_binding() {
 			return getRuleContexts(Let_bindingContext.class);
 		}
 		public Let_bindingContext let_binding(int i) {
 			return getRuleContext(Let_bindingContext.class,i);
 		}
-		public TerminalNode IN() { return getToken(CoolParser.IN, 0); }
 		public ExprContext expr() {
 			return getRuleContext(ExprContext.class,0);
 		}
@@ -1135,7 +1137,8 @@ public class CoolParser extends Parser {
 				setState(118);
 				match(LET);
 				setState(119);
-				let_binding();
+				((LetExprContext)_localctx).let_binding = let_binding();
+				((LetExprContext)_localctx).let_bindings.add(((LetExprContext)_localctx).let_binding);
 				setState(124);
 				_errHandler.sync(this);
 				_la = _input.LA(1);
@@ -1145,7 +1148,8 @@ public class CoolParser extends Parser {
 					setState(120);
 					match(COMMA);
 					setState(121);
-					let_binding();
+					((LetExprContext)_localctx).let_binding = let_binding();
+					((LetExprContext)_localctx).let_bindings.add(((LetExprContext)_localctx).let_binding);
 					}
 					}
 					setState(126);

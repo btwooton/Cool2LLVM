@@ -20,7 +20,7 @@ expr
     | IF condition=expr THEN then_expr=expr ELSE else_expr=expr FI # conditionalExpr
     | WHILE condition=expr LOOP body=expr POOL # loopExpr
     | LBRACE (exprs+=expr SEMICOLON)+ RBRACE # blockExpr
-    | LET let_binding (COMMA let_binding)* IN body=expr # letExpr
+    | LET let_bindings+=let_binding (COMMA let_bindings+=let_binding)* IN body=expr # letExpr
     | CASE case_expr=expr OF (identifiers+=ID COLON types+=TypeID ARROW sub_exprs+=expr SEMICOLON)+ ESAC # caseExpr
     | NEW TypeID # newExpr
     | ISVOID expr # isvoidExpr
