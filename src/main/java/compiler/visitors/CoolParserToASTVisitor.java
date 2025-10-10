@@ -222,4 +222,14 @@ public class CoolParserToASTVisitor extends CoolParserBaseVisitor<ASTNode> {
             initExpr
         );
     }
+
+    @Override
+    public ASTNode visitBlockExpr(grammar.CoolParser.BlockExprContext ctx) {
+        return new compiler.ast.BlockExprNode(
+            ctx.getStart().getLine(),
+            ctx.exprs.stream().map((exprCtx) -> {
+                return (compiler.ast.ExprNode) visit(exprCtx);
+            }).collect(Collectors.toList())
+        );
+    }
 }

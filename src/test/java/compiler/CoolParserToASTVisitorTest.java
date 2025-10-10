@@ -253,4 +253,36 @@ public class CoolParserToASTVisitorTest {
         assertTrue(bodyBin.right instanceof IdentifierExprNode);
         assertEquals("z", ((IdentifierExprNode) bodyBin.right).name);
     }
+
+    @Test
+    public void testBlockExpr() {
+        // Given: You parse the following Cool expression containing a block
+        CoolParser.ExprContext ctx = CoolTestUtils.parseExpr("{ 1 + 2; isvoid myVar; \"hello\"; }");
+        // When: You visit the parse tree with your CoolParserToASTVisitor
+        CoolParserToASTVisitor visitor = new CoolParserToASTVisitor();
+        ASTNode node = visitor.visit(ctx);
+        // Then: You get a BlockExprNode at the top level
+        assertTrue(node instanceof BlockExprNode);
+        BlockExprNode block = (BlockExprNode) node;
+        // Then: The block has three expressions
+        assertEquals(3, block.expressions.size());
+        // Then: The first expression is a BinaryOpExprNode for 1 + 2
+        assertTrue(block.expressions.get(0) instanceof BinaryOpExprNode);
+        BinaryOpExprNode bin = (BinaryOpExprNode) block.expressions.get(0);
+        assertEquals(BinaryOpExprNode.Op.ADD, bin.operator);
+        assertTrue(bin.left instanceof LiteralExprNode);
+        assertEquals(1, ((LiteralExprNode) bin.left).value);
+        assertTrue(bin.right instanceof LiteralExprNode);
+        assertEquals(2, ((LiteralExprNode) bin.right).value);
+        // Then: The second expression is an IsVoidExprNode for isvoid myVar
+        assertTrue(block.expressions.get(1) instanceof IsVoidExprNode);
+        IsVoidExprNode isvoid = (IsVoidExprNode) block.expressions.get(1);
+        assertTrue(isvoid.expr instanceof IdentifierExprNode);
+        assertEquals("myVar", ((IdentifierExprNode) isvoid.expr).name);
+        // Then: The third expression is a LiteralExprNode for the string "hello"
+        assertTrue(block.expressions.get(2) instanceof LiteralExprNode);
+        LiteralExprNode lit = (LiteralExprNode) block.expressions.get(2);
+        assertEquals(LiteralExprNode.LiteralType.STRING, lit.type);
+        assertEquals("hello", lit.value);
+    }
 }
