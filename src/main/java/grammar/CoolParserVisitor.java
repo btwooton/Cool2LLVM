@@ -45,6 +45,12 @@ public interface CoolParserVisitor<T> extends ParseTreeVisitor<T> {
 	 */
 	T visitFormal(CoolParser.FormalContext ctx);
 	/**
+	 * Visit a parse tree produced by {@link CoolParser#let_binding}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitLet_binding(CoolParser.Let_bindingContext ctx);
+	/**
 	 * Visit a parse tree produced by the {@code newExpr}
 	 * labeled alternative in {@link CoolParser#expr}.
 	 * @param ctx the parse tree
