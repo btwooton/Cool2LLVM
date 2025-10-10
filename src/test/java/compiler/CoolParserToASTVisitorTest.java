@@ -420,4 +420,53 @@ public class CoolParserToASTVisitorTest {
         assertTrue(param3.right instanceof LiteralExprNode);
         assertEquals(4, ((LiteralExprNode) param3.right).value);
     }
+
+    @Test
+
+    public void testClassDefinition() {
+        // Given: You parse the following Cool class definition
+        String classDefStr = (
+            "class MyClass inherits MyParent {\n" +
+            "   myAttr : Int <- 42;\n" +
+            "   myMethod(x : Int, y : Bool) : String {\n" +
+            "       if y then \"yes\" else \"no\" fi\n" +
+            "   };\n" +
+            "};"
+        );
+        CoolParser.ClassContext ctx = CoolTestUtils.parseClass(classDefStr);
+        // When: You visit the parse tree with your CoolParserToASTVisitor
+        CoolParserToASTVisitor visitor = new CoolParserToASTVisitor();
+        ASTNode node = visitor.visit(ctx);
+        // Then: You get a ClassNode at the top level
+        assertTrue(node instanceof ClassNode);
+        ClassNode classNode = (ClassNode) node;
+        // Then: The class name is MyClass
+        assertEquals("MyClass", classNode.className);
+        // Then: The parent name is MyParent
+        assertEquals("MyParent", classNode.parentName);
+        // Then: There are two features
+        assertEquals(2, classNode.attributes.size() + classNode.methods.size());
+        // Then: The first feature is an AttributeFeatureNode for myAttr
+        AttributeFeatureNode attr = classNode.attributes.get(0);
+        assertEquals("myAttr", attr.featureName);
+        assertEquals("Int", attr.featureType);
+        assertTrue(attr.initExpr instanceof LiteralExprNode);
+        LiteralExprNode initLit = (LiteralExprNode) attr.initExpr;
+        assertEquals(LiteralExprNode.LiteralType.INT, initLit.type);
+        assertEquals(42, initLit.value);
+        // Then: The second feature is a MethodFeatureNode for myMethod
+        MethodFeatureNode method = classNode.methods.get(0);
+        assertEquals("myMethod", method.featureName);
+        assertEquals("String", method.featureType);
+        // Then: There are two formals
+        assertEquals(2, method.formals.size());
+        // Then: The first formal is for x : Int
+        FormalNode formal1 = method.formals.get(0);
+        assertEquals("x", formal1.formalName);
+        assertEquals("Int", formal1.formalType);
+        // Then: The second formal is for y : Bool
+        FormalNode formal2 = method.formals.get(1);
+        assertEquals("y", formal2.formalName);
+        assertEquals("Bool", formal2.formalType);
+    }
 }

@@ -23,4 +23,12 @@ public class CoolTestUtils {
         CoolParser parser = new CoolParser(tokens);
         return parser.program(); // for full pipeline tests
     }
+
+    public static CoolParser.ClassContext parseClass(String src) {
+        CharStream input = CharStreams.fromString(src);
+        CoolLexer lexer = new CoolLexer(input);
+        CommonTokenStream tokens = new CommonTokenStream(lexer);
+        CoolParser parser = new CoolParser(tokens);
+        return parser.class_(); // Parse directly from class rule
+    }
 }

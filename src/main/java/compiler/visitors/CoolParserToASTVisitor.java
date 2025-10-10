@@ -293,4 +293,75 @@ public class CoolParserToASTVisitor extends CoolParserBaseVisitor<ASTNode> {
             arguments
         );
     }
+
+    @Override
+    public ASTNode visitClass(grammar.CoolParser.ClassContext ctx) {
+        String className = ctx.class_name.getText();
+        String parentName = ctx.parent_name == null ? null : ctx.parent_name.getText();
+        java.util.List<compiler.ast.AttributeFeatureNode> attributes = new java.util.ArrayList<>();
+        java.util.List<compiler.ast.MethodFeatureNode> methods = new java.util.ArrayList<>();
+        for (grammar.CoolParser.FeatureContext featureCtx : ctx.features) {
+            ASTNode featureNode = featureCtx.accept(this);
+            if (featureNode instanceof compiler.ast.AttributeFeatureNode) {
+                attributes.add((compiler.ast.AttributeFeatureNode) featureNode);
+            } else if (featureNode instanceof compiler.ast.MethodFeatureNode) {
+                methods.add((compiler.ast.MethodFeatureNode) featureNode);
+            } else {
+                throw new RuntimeException("Unexpected feature node type: " + featureNode.getClass().getName());
+            }
+        }
+        return new compiler.ast.ClassNode(
+            ctx.getStart().getLine(),
+            className,
+            parentName,
+            attributes,
+            methods
+        );
+    }
+
+    @Override
+    public ASTNode visitAttributeFeature(grammar.CoolParser.AttributeFeatureContext ctx) {
+        String featureName = ctx.attribute_name.getText();
+        String featureType = ctx.attribute_type.getText();
+        compiler.ast.ExprNode initExpr = null;
+        if (ctx.initializer != null) {
+            initExpr = (compiler.ast.ExprNode) visit(ctx.initializer);
+        }
+        return new compiler.ast.AttributeFeatureNode(
+            ctx.getStart().getLine(),
+            featureName,
+            featureType,
+            initExpr
+        );
+    }
+
+    @Override
+    public ASTNode visitMethodFeature(grammar.CoolParser.MethodFeatureContext ctx) {
+        String methodName = ctx.method_name.getText();
+        String returnType = ctx.return_type.getText();
+        java.util.List<compiler.ast.FormalNode> formals = new java.util.ArrayList<>();
+        for (grammar.CoolParser.FormalContext formalCtx : ctx.formal_params) {
+            formals.add((compiler.ast.FormalNode) visit(formalCtx));
+        }
+        compiler.ast.ExprNode methodBody = (compiler.ast.ExprNode) visit(ctx.body);
+        return new compiler.ast.MethodFeatureNode(
+            ctx.getStart().getLine(),
+            methodName,
+            returnType,
+            formals,
+            methodBody
+        );
+    }
+
+    @Override
+    public ASTNode visitFormal(grammar.CoolParser.FormalContext ctx) {
+        String formalName = ctx.parameter_name.getText();
+        String formalType = ctx.parameter_type.getText();
+        return new compiler.ast.FormalNode(
+            ctx.getStart().getLine(),
+            formalName,
+            formalType
+        );
+    }
+
 }

@@ -5,13 +5,16 @@ import compiler.visitors.ASTVisitor;
 public class ClassNode extends ASTNode {
     public String className;
     public String parentName; // null if no parent
-    public List<FeatureNode> features;
+    public List<AttributeFeatureNode> attributes;
+    public List<MethodFeatureNode> methods;
+    
 
-    public ClassNode(int lineNumber, String className, String parentName, List<FeatureNode> features) {
+    public ClassNode(int lineNumber, String className, String parentName, List<AttributeFeatureNode> attributes, List<MethodFeatureNode> methods) {
         super(lineNumber);
         this.className = className;
         this.parentName = parentName;
-        this.features = features;
+        this.attributes = attributes;
+        this.methods = methods;
     }
 
     @Override

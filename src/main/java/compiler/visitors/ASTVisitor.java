@@ -4,7 +4,8 @@ import compiler.ast.*;
 public interface ASTVisitor<T> {
     T visitProgram(ProgramNode node);
     T visitClass(ClassNode node);
-    T visitFeature(FeatureNode node); 
+    T visitAttributeFeature(AttributeFeatureNode node);
+    T visitMethodFeature(MethodFeatureNode node);
     T visitFormal(FormalNode node);
     T visitAssignExpr(AssignExprNode node);
     T visitMethodCallExpr(MethodCallExprNode node);
