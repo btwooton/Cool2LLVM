@@ -345,4 +345,79 @@ public class CoolParserToASTVisitorTest {
         assertEquals(LiteralExprNode.LiteralType.INT, elseLit.type);
         assertEquals(200, elseLit.value);
     }
+
+    @Test
+    public void testExplicitMethodCallExpr() {
+        // Given: You parse the following Cool expression containing an explicit method call
+        CoolParser.ExprContext ctx = CoolTestUtils.parseExpr("myObj@MyType.myMethod(1, 2, 3+4)");
+        // When: You visit the parse tree with your CoolParserToASTVisitor
+        CoolParserToASTVisitor visitor = new CoolParserToASTVisitor();
+        ASTNode node = visitor.visit(ctx);
+        // Then: You get a MethodCallExprNode at the top level
+        assertTrue(node instanceof MethodCallExprNode);
+        MethodCallExprNode call = (MethodCallExprNode) node;
+        // Then: The caller is an IdentifierExprNode for myObj
+        assertTrue(call.caller instanceof IdentifierExprNode);
+        assertEquals("myObj", ((IdentifierExprNode) call.caller).name);
+        // Then: The referenced type is MyType
+        assertEquals("MyType", call.referencedType);
+        // Then: The method name is myMethod
+        assertEquals("myMethod", call.methodName);
+        // Then: There are three parameters
+        assertEquals(3, call.parameters.size());
+        // Then: The first two parameters are LiteralExprNodes for the integers 1 and
+        assertTrue(call.parameters.get(0) instanceof LiteralExprNode);
+        LiteralExprNode param1 = (LiteralExprNode) call.parameters.get(0);
+        assertEquals(LiteralExprNode.LiteralType.INT, param1.type);
+        assertEquals(1, param1.value);
+        assertTrue(call.parameters.get(1) instanceof LiteralExprNode);
+        LiteralExprNode param2 = (LiteralExprNode) call.parameters.get(1);
+        assertEquals(LiteralExprNode.LiteralType.INT, param2.type);
+        assertEquals(2, param2.value);
+        // Then: The third parameter is a BinaryOpExprNode for 3 + 4
+        assertTrue(call.parameters.get(2) instanceof BinaryOpExprNode);
+        BinaryOpExprNode param3 = (BinaryOpExprNode) call.parameters.get(2);
+        assertEquals(BinaryOpExprNode.Op.ADD, param3.operator);
+        assertTrue(param3.left instanceof LiteralExprNode);
+        assertEquals(3, ((LiteralExprNode) param3.left).value);
+        assertTrue(param3.right instanceof LiteralExprNode);
+        assertEquals(4, ((LiteralExprNode) param3.right).value);
+    }
+
+    @Test
+    public void testImplicitMethodCallExpr() {
+        // Given: You parse the following Cool expression containing an implicit method call
+        CoolParser.ExprContext ctx = CoolTestUtils.parseExpr("myMethod(1, 2, 3+4)");
+        // When: You visit the parse tree with your Cool
+        CoolParserToASTVisitor visitor = new CoolParserToASTVisitor();
+        ASTNode node = visitor.visit(ctx);
+        // Then: You get a MethodCallExprNode at the top level
+        assertTrue(node instanceof MethodCallExprNode);
+        MethodCallExprNode call = (MethodCallExprNode) node;
+        // Then: The caller is null
+        assertNull(call.caller);
+        // Then: The referenced type is null
+        assertNull(call.referencedType);
+        // Then: The method name is myMethod
+        assertEquals("myMethod", call.methodName);
+        // Then: There are three parameters
+        assertEquals(3, call.parameters.size());
+        // Then: The first two parameters are LiteralExprNodes for the integers 1 and
+        assertTrue(call.parameters.get(0) instanceof LiteralExprNode);
+        LiteralExprNode param1 = (LiteralExprNode) call.parameters.get(0);
+        assertEquals(LiteralExprNode.LiteralType.INT, param1.type);
+        assertEquals(1, param1.value);
+        assertTrue(call.parameters.get(1) instanceof LiteralExprNode);
+        LiteralExprNode param2 = (LiteralExprNode) call.parameters.get(1);
+        assertEquals(LiteralExprNode.LiteralType.INT, param2.type);
+        assertEquals(2, param2.value);
+        // Then: The third parameter is a BinaryOpExprNode for 3 + 4
+        assertTrue(call.parameters.get(2) instanceof BinaryOpExprNode);
+        BinaryOpExprNode param3 = (BinaryOpExprNode) call.parameters.get(2);
+        assertEquals(BinaryOpExprNode.Op.ADD, param3.operator);
+        assertTrue(param3.left instanceof LiteralExprNode);
+        assertEquals(3, ((LiteralExprNode) param3.left).value);
+        assertTrue(param3.right instanceof LiteralExprNode);
+        assertEquals(4, ((LiteralExprNode) param3.right).value);
+    }
 }

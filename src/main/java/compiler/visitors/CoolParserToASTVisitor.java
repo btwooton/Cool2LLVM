@@ -260,4 +260,37 @@ public class CoolParserToASTVisitor extends CoolParserBaseVisitor<ASTNode> {
             (compiler.ast.ExprNode) visit(ctx.else_expr)
         );
     }
+
+    @Override
+    public ASTNode visitMethodCallExpr(grammar.CoolParser.MethodCallExprContext ctx) {
+        compiler.ast.ExprNode target = (compiler.ast.ExprNode) visit(ctx.target);
+        String referencedType = ctx.referenced_type == null ? null : ctx.referenced_type.getText();
+        String methodName = ctx.method_name.getText();
+        java.util.List<compiler.ast.ExprNode> arguments = ctx.arguments.stream()
+            .map(argCtx -> (compiler.ast.ExprNode) visit(argCtx))
+            .collect(Collectors.toList());
+        return new compiler.ast.MethodCallExprNode(
+            ctx.getStart().getLine(),
+            target,
+            referencedType,
+            methodName,
+            arguments
+        );
+    }
+
+    @Override
+    public ASTNode visitImplicitMethodCallExpr(grammar.CoolParser.ImplicitMethodCallExprContext ctx) {
+        String methodName = ctx.method_name.getText();
+        java.util.List<compiler.ast.ExprNode> arguments = ctx.arguments.stream()
+            .map(argCtx -> (compiler.ast.ExprNode) visit(argCtx))
+            .collect(Collectors.toList());
+        // For implicit method calls, the target and referenced type are both null
+        return new compiler.ast.MethodCallExprNode(
+            ctx.getStart().getLine(),
+            null,
+            null,
+            methodName,
+            arguments
+        );
+    }
 }
