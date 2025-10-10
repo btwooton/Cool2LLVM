@@ -1,7 +1,5 @@
 package compiler.ast;
 
-import java.util.List;
-
 import compiler.visitors.ASTVisitor;
 
 public class AttributeFeatureNode extends ASTNode {
