@@ -12,6 +12,7 @@ public interface ASTVisitor<T> {
     T visitLoopExpr(LoopExprNode node);
     T visitBlockExpr(BlockExprNode node);
     T visitLetExpr(LetExprNode node);
+    T visitLetBinding(LetBindingNode node);
     T visitCaseExpr(CaseExprNode node);
     T visitNewExpr(NewExprNode node);
     T visitIsVoidExpr(IsVoidExprNode node);

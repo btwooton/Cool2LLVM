@@ -2,6 +2,7 @@ package compiler.visitors;
 
 import compiler.ast.ASTNode;
 import grammar.CoolParserBaseVisitor;
+import java.util.stream.Collectors;
 
 
 public class CoolParserToASTVisitor extends CoolParserBaseVisitor<ASTNode> {
@@ -155,25 +156,70 @@ public class CoolParserToASTVisitor extends CoolParserBaseVisitor<ASTNode> {
         );
     }
 
-    @Override public ASTNode visitIdentifierExpr(grammar.CoolParser.IdentifierExprContext ctx) {
+    @Override 
+    public ASTNode visitIdentifierExpr(grammar.CoolParser.IdentifierExprContext ctx) {
         return new compiler.ast.IdentifierExprNode(
             ctx.getStart().getLine(),
             ctx.getText()
         );
     }
 
-    @Override public ASTNode visitIsvoidExpr(grammar.CoolParser.IsvoidExprContext ctx) {
+    @Override 
+    public ASTNode visitIsvoidExpr(grammar.CoolParser.IsvoidExprContext ctx) {
         return new compiler.ast.IsVoidExprNode(
             ctx.getStart().getLine(),
             (compiler.ast.ExprNode) visit(ctx.getChild(1))
         );
     }
 
-    @Override public ASTNode visitNewExpr(grammar.CoolParser.NewExprContext ctx) {
+    @Override 
+    public ASTNode visitNewExpr(grammar.CoolParser.NewExprContext ctx) {
         return new compiler.ast.NewExprNode(
             ctx.getStart().getLine(),
             ctx.getChild(1).getText()
         );
     }
-    
+
+    @Override 
+    public ASTNode visitCaseExpr(grammar.CoolParser.CaseExprContext ctx) {
+        return new compiler.ast.CaseExprNode(
+            ctx.getStart().getLine(),
+            (compiler.ast.ExprNode) visit(ctx.case_expr),
+            ctx.identifiers.stream().map((id) -> {
+                // Find the index of this identifier in the list
+                int index = ctx.identifiers.indexOf(id);
+                String varName = id.getText();
+                String varType = ctx.types.get(index).getText();
+                compiler.ast.ExprNode branchExpr = (compiler.ast.ExprNode) visit(ctx.sub_exprs.get(index));
+                return new compiler.ast.CaseBranch(varName, varType, branchExpr);
+            }).collect(Collectors.toList())
+        );
+    }
+
+    @Override
+    public ASTNode visitLetExpr(grammar.CoolParser.LetExprContext ctx) {
+        return new compiler.ast.LetExprNode(
+            ctx.getStart().getLine(),
+            ctx.let_bindings.stream().map((bindingCtx) -> {
+                return (compiler.ast.LetBindingNode) bindingCtx.accept(this);
+            }).collect(Collectors.toList()),
+            (compiler.ast.ExprNode) visit(ctx.body)
+        );
+    }
+
+    @Override
+    public ASTNode visitLet_binding(grammar.CoolParser.Let_bindingContext ctx) {
+        String varName = ctx.identifier.getText();
+        String varType = ctx.type.getText();
+        compiler.ast.ExprNode initExpr = null;
+        if (ctx.initializer != null) {
+            initExpr = (compiler.ast.ExprNode) visit(ctx.initializer);
+        }
+        return new compiler.ast.LetBindingNode(
+            ctx.getStart().getLine(),
+            varName,
+            varType,
+            initExpr
+        );
+    }
 }

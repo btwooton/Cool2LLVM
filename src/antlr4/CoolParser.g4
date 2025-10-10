@@ -12,15 +12,12 @@ feature : method_name=ID LPAREN (formal_params+=formal (COMMA formal_params+=for
         | attribute_name=ID COLON attribute_type=TypeID (ASSIGN initializer=expr)? # attributeFeature
         ;
 formal: parameter_name=ID COLON parameter_type=TypeID;
-let_binding: identifier=ID COLON type=TypeID (ASSIGN initializer=expr)?;
-expr
-    : identifier=ID ASSIGN expression=expr # assignExpr
+expr: identifier=ID ASSIGN expression=expr # assignExpr
     | target=expr (AT referenced_type=TypeID)? DOT method_name=ID LPAREN (arguments+=expr (COMMA arguments+=expr)*)? RPAREN # methodCallExpr
     | method_name=ID LPAREN (arguments+=expr (COMMA arguments+=expr)*)? RPAREN # implicitMethodCallExpr
     | IF condition=expr THEN then_expr=expr ELSE else_expr=expr FI # conditionalExpr
     | WHILE condition=expr LOOP body=expr POOL # loopExpr
     | LBRACE (exprs+=expr SEMICOLON)+ RBRACE # blockExpr
-    | LET let_bindings+=let_binding (COMMA let_bindings+=let_binding)* IN body=expr # letExpr
     | CASE case_expr=expr OF (identifiers+=ID COLON types+=TypeID ARROW sub_exprs+=expr SEMICOLON)+ ESAC # caseExpr
     | NEW TypeID # newExpr
     | ISVOID expr # isvoidExpr
@@ -33,6 +30,7 @@ expr
     | left=expr LE right=expr # leExpr
     | left=expr EQ right=expr # eqExpr
     | NOT expr # notExpr
+    | LET let_bindings+=let_binding (COMMA let_bindings+=let_binding)* IN body=expr # letExpr
     | LPAREN expr RPAREN # parenExpr
     | ID # identifierExpr
     | Integer # integerLiteralExpr
@@ -40,3 +38,5 @@ expr
     | TRUE # trueLiteralExpr
     | FALSE # falseLiteralExpr
     ;
+
+let_binding: identifier=ID COLON type=TypeID (ASSIGN initializer=expr)?;

@@ -179,4 +179,78 @@ public class CoolParserToASTVisitorTest {
         // Then: The typeName is correct
         assertEquals("MyClass", newExpr.typeName);
     }
+
+    @Test
+    public void testCaseExpr() {
+        // Given: You parse the following Cool expression containing a case statement
+        CoolParser.ExprContext ctx = CoolTestUtils.parseExpr("case myVar of x: Int => x + 1; y: Bool => not y; esac");
+        // When: You visit the parse tree with your CoolParserToASTVisitor
+        CoolParserToASTVisitor visitor = new CoolParserToASTVisitor();
+        ASTNode node = visitor.visit(ctx);
+        // Then: You get a CaseExprNode at the top level
+        assertTrue(node instanceof CaseExprNode);
+        CaseExprNode caseExpr = (CaseExprNode) node;
+        // Then: The expression being switched on is an IdentifierExprNode with the correct name
+        assertTrue(caseExpr.expr instanceof IdentifierExprNode);
+        IdentifierExprNode id = (IdentifierExprNode) caseExpr.expr;
+        assertEquals("myVar", id.name);
+        // Then: There are two branches
+        assertEquals(2, caseExpr.branches.size());
+        // Then: The first branch has the correct variable name, type, and expression
+        CaseBranch branch1 = caseExpr.branches.get(0);
+        assertEquals("x", branch1.varName);
+        assertEquals("Int", branch1.varType);
+        assertTrue(branch1.expr instanceof BinaryOpExprNode);
+        BinaryOpExprNode bin = (BinaryOpExprNode) branch1.expr;
+        assertEquals(BinaryOpExprNode.Op.ADD, bin.operator);
+        assertTrue(bin.left instanceof IdentifierExprNode);
+        assertEquals("x", ((IdentifierExprNode) bin.left).name);
+        assertTrue(bin.right instanceof LiteralExprNode);
+        assertEquals(LiteralExprNode.LiteralType.INT, ((LiteralExprNode) bin.right).type);
+        assertEquals(1, ((LiteralExprNode) bin.right).value);
+        // Then: The second branch has the correct variable name, type, and expression
+        CaseBranch branch2 = caseExpr.branches.get(1);
+        assertEquals("y", branch2.varName);
+        assertEquals("Bool", branch2.varType);
+        assertTrue(branch2.expr instanceof UnaryOpExprNode);
+        UnaryOpExprNode unary = (UnaryOpExprNode) branch2.expr;
+        assertEquals(UnaryOpExprNode.Op.NOT, unary.operator);
+        assertTrue(unary.expr instanceof IdentifierExprNode);
+        assertEquals("y", ((IdentifierExprNode) unary.expr).name);
+    }
+    
+    @Test
+    public void testLetExpr() {
+        // Given: You parse the following Cool expression containing a let
+        String letExprStr = (
+            "let x : Int <- 5 + 10, y : Int <- 10 + 10, z : Int in x + y + z"
+        );
+        CoolParser.ExprContext ctx = CoolTestUtils.parseExpr(letExprStr);
+        // When: You visit the parse tree with your CoolParserToASTVisitor
+        CoolParserToASTVisitor visitor = new CoolParserToASTVisitor();
+        ASTNode node = visitor.visit(ctx);
+        System.out.println(node.getClass().getName());
+        // Then: You get a LetExprNode at the top level
+        assertTrue(node instanceof LetExprNode);
+        // Then: The LetExprNode has three bindings
+        LetExprNode letExpr = (LetExprNode) node;
+        assertEquals(3, letExpr.letBindings.size());
+        // Then: The body is a BinaryOpExprNode representing x + y + z
+        assertTrue(letExpr.body instanceof BinaryOpExprNode);
+        BinaryOpExprNode bodyBin = (BinaryOpExprNode) letExpr.body;
+        assertEquals(BinaryOpExprNode.Op.ADD, bodyBin.operator);
+        // Then: The left child of the body is a BinaryOpExprNode representing x + y
+        assertTrue(bodyBin.left instanceof BinaryOpExprNode);
+        BinaryOpExprNode leftBin = (BinaryOpExprNode) bodyBin.left;
+        assertEquals(BinaryOpExprNode.Op.ADD, leftBin.operator);
+        // Then: The left child of the left binary op is an IdentifierExprNode for x
+        assertTrue(leftBin.left instanceof IdentifierExprNode);
+        assertEquals("x", ((IdentifierExprNode) leftBin.left).name);
+        // Then: The right child of the left binary op is an IdentifierExprNode for y
+        assertTrue(leftBin.right instanceof IdentifierExprNode);
+        assertEquals("y", ((IdentifierExprNode) leftBin.right).name);
+        // Then: The right child of the body binary op is an IdentifierExprNode for z
+        assertTrue(bodyBin.right instanceof IdentifierExprNode);
+        assertEquals("z", ((IdentifierExprNode) bodyBin.right).name);
+    }
 }
