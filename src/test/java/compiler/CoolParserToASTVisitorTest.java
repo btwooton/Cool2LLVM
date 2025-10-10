@@ -5,6 +5,7 @@ import compiler.utils.CoolTestUtils;
 import grammar.CoolParser;
 import compiler.visitors.CoolParserToASTVisitor;
 import org.junit.jupiter.api.Test;
+
 import static org.junit.jupiter.api.Assertions.*;
 
 
@@ -229,7 +230,6 @@ public class CoolParserToASTVisitorTest {
         // When: You visit the parse tree with your CoolParserToASTVisitor
         CoolParserToASTVisitor visitor = new CoolParserToASTVisitor();
         ASTNode node = visitor.visit(ctx);
-        System.out.println(node.getClass().getName());
         // Then: You get a LetExprNode at the top level
         assertTrue(node instanceof LetExprNode);
         // Then: The LetExprNode has three bindings
@@ -284,5 +284,65 @@ public class CoolParserToASTVisitorTest {
         LiteralExprNode lit = (LiteralExprNode) block.expressions.get(2);
         assertEquals(LiteralExprNode.LiteralType.STRING, lit.type);
         assertEquals("hello", lit.value);
+    }
+
+    @Test
+    public void testLoopExpr() {
+        // Given: You parse the following Cool expression containing a loop
+        CoolParser.ExprContext ctx = CoolTestUtils.parseExpr("while x < 10 loop x <- x + 1 pool");
+        // When: You visit the parse tree with your CoolParserToASTVisitor
+        CoolParserToASTVisitor visitor = new CoolParserToASTVisitor();
+        ASTNode node = visitor.visit(ctx);
+        // Then: You get a LoopExprNode at the top level
+        assertTrue(node instanceof LoopExprNode);
+        LoopExprNode loop = (LoopExprNode) node;
+        // Then: The condition is a BinaryOpExprNode for x < 10
+        assertTrue(loop.condition instanceof BinaryOpExprNode);
+        BinaryOpExprNode condBin = (BinaryOpExprNode) loop.condition;
+        assertEquals(BinaryOpExprNode.Op.LT, condBin.operator);
+        assertTrue(condBin.left instanceof IdentifierExprNode);
+        assertEquals("x", ((IdentifierExprNode) condBin.left).name);
+        assertTrue(condBin.right instanceof LiteralExprNode);
+        assertEquals(LiteralExprNode.LiteralType.INT, ((LiteralExprNode) condBin.right).type);
+        assertEquals(10, ((LiteralExprNode) condBin.right).value);
+        // Then: The body is an AssignExprNode for x <- x + 1
+        assertTrue(loop.body instanceof AssignExprNode);
+        AssignExprNode bodyAssign = (AssignExprNode) loop.body;
+        assertEquals("x", bodyAssign.varName);
+        assertTrue(bodyAssign.rhs instanceof BinaryOpExprNode);
+        BinaryOpExprNode rightBin = (BinaryOpExprNode) bodyAssign.rhs;
+        assertEquals(BinaryOpExprNode.Op.ADD, rightBin.operator);
+        assertTrue(rightBin.left instanceof IdentifierExprNode);
+        assertEquals("x", ((IdentifierExprNode) rightBin.left).name);
+        assertTrue(rightBin.right instanceof LiteralExprNode);
+        assertEquals(LiteralExprNode.LiteralType.INT, ((LiteralExprNode) rightBin.right).type);
+        assertEquals(1, ((LiteralExprNode) rightBin.right).value);
+    }
+
+    @Test
+    public void testConditionalExpr() {
+        // Given: You parse the following Cool expression containing a conditional
+        CoolParser.ExprContext ctx = CoolTestUtils.parseExpr("if isvoid myVar then 100 else 200 fi");
+        // When: You visit the parse tree with your CoolParserToASTVisitor
+        CoolParserToASTVisitor visitor = new CoolParserToASTVisitor();
+        ASTNode node = visitor.visit(ctx);
+        // Then: You get a ConditionalExprNode at the top level
+        assertTrue(node instanceof ConditionalExprNode);
+        ConditionalExprNode cond = (ConditionalExprNode) node;
+        // Then: The condition is an IsVoidExprNode for isvoid myVar
+        assertTrue(cond.condition instanceof IsVoidExprNode);
+        IsVoidExprNode isvoid = (IsVoidExprNode) cond.condition;
+        assertTrue(isvoid.expr instanceof IdentifierExprNode);
+        assertEquals("myVar", ((IdentifierExprNode) isvoid.expr).name);
+        // Then: The then expression is a LiteralExprNode for the integer 100
+        assertTrue(cond.thenExpr instanceof LiteralExprNode);
+        LiteralExprNode thenLit = (LiteralExprNode) cond.thenExpr;
+        assertEquals(LiteralExprNode.LiteralType.INT, thenLit.type);
+        assertEquals(100, thenLit.value);
+        // Then: The else expression is a LiteralExprNode for the integer 200
+        assertTrue(cond.elseExpr instanceof LiteralExprNode);
+        LiteralExprNode elseLit = (LiteralExprNode) cond.elseExpr;
+        assertEquals(LiteralExprNode.LiteralType.INT, elseLit.type);
+        assertEquals(200, elseLit.value);
     }
 }

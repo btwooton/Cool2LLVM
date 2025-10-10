@@ -12,8 +12,7 @@ feature : method_name=ID LPAREN (formal_params+=formal (COMMA formal_params+=for
         | attribute_name=ID COLON attribute_type=TypeID (ASSIGN initializer=expr)? # attributeFeature
         ;
 formal: parameter_name=ID COLON parameter_type=TypeID;
-expr: identifier=ID ASSIGN expression=expr # assignExpr
-    | target=expr (AT referenced_type=TypeID)? DOT method_name=ID LPAREN (arguments+=expr (COMMA arguments+=expr)*)? RPAREN # methodCallExpr
+expr: target=expr (AT referenced_type=TypeID)? DOT method_name=ID LPAREN (arguments+=expr (COMMA arguments+=expr)*)? RPAREN # methodCallExpr
     | method_name=ID LPAREN (arguments+=expr (COMMA arguments+=expr)*)? RPAREN # implicitMethodCallExpr
     | IF condition=expr THEN then_expr=expr ELSE else_expr=expr FI # conditionalExpr
     | WHILE condition=expr LOOP body=expr POOL # loopExpr
@@ -37,6 +36,7 @@ expr: identifier=ID ASSIGN expression=expr # assignExpr
     | String # stringLiteralExpr
     | TRUE # trueLiteralExpr
     | FALSE # falseLiteralExpr
+    | identifier=ID ASSIGN expression=expr # assignExpr
     ;
 
 let_binding: identifier=ID COLON type=TypeID (ASSIGN initializer=expr)?;

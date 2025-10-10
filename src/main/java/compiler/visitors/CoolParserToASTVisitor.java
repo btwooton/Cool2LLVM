@@ -232,4 +232,32 @@ public class CoolParserToASTVisitor extends CoolParserBaseVisitor<ASTNode> {
             }).collect(Collectors.toList())
         );
     }
+
+    @Override
+    public ASTNode visitLoopExpr(grammar.CoolParser.LoopExprContext ctx) {
+        return new compiler.ast.LoopExprNode(
+            ctx.getStart().getLine(),
+            (compiler.ast.ExprNode) visit(ctx.condition),
+            (compiler.ast.ExprNode) visit(ctx.body)
+        );
+    }
+
+    @Override
+    public ASTNode visitAssignExpr(grammar.CoolParser.AssignExprContext ctx) {
+        return new compiler.ast.AssignExprNode(
+            ctx.getStart().getLine(),
+            ctx.identifier.getText(),
+            (compiler.ast.ExprNode) visit(ctx.expression)
+        );
+    }
+
+    @Override
+    public ASTNode visitConditionalExpr(grammar.CoolParser.ConditionalExprContext ctx) {
+        return new compiler.ast.ConditionalExprNode(
+            ctx.getStart().getLine(),
+            (compiler.ast.ExprNode) visit(ctx.condition),
+            (compiler.ast.ExprNode) visit(ctx.then_expr),
+            (compiler.ast.ExprNode) visit(ctx.else_expr)
+        );
+    }
 }
