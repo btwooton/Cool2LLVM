@@ -3,6 +3,8 @@ package compiler.visitors;
 import compiler.ast.ASTNode;
 import grammar.CoolParserBaseVisitor;
 import java.util.stream.Collectors;
+import java.util.List;
+import java.util.ArrayList;
 
 
 public class CoolParserToASTVisitor extends CoolParserBaseVisitor<ASTNode> {
@@ -317,6 +319,19 @@ public class CoolParserToASTVisitor extends CoolParserBaseVisitor<ASTNode> {
             attributes,
             methods
         );
+    }
+
+    @Override
+    public ASTNode visitProgram(grammar.CoolParser.ProgramContext ctx) {
+        // get all of the child classes as AstNodes
+        List<compiler.ast.ClassNode> classNodes = new ArrayList<>();
+        for (grammar.CoolParser.ClassContext classCtx: ctx.classes) {
+            classNodes.add((compiler.ast.ClassNode)classCtx.accept(this));
+        }
+
+        // return the newly constructed program node
+        return new compiler.ast.ProgramNode(ctx.getStart().getLine(), classNodes);
+
     }
 
     @Override
