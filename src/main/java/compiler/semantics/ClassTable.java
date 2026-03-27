@@ -157,19 +157,27 @@ public class ClassTable {
         if (className == null) {
             return false;
         }
-        if (className == "Object" && ancestorName == null) {
-            // Special case for Object class which has no ancestor
+        if (className.equals(ancestorName)) {
+            // a class is its own ancestor
             return true;
         }
         // get the node associated with the className
         ClassNode node = classes.get(className);
-        // get the name of the parent
-        String parentName = node.parentName;
-        if (parentName == ancestorName) {
-            return true;
+        if (node == null) {
+            return false;
         }
-        // recursively check if the ancestor is ancestor of parent
-        return isAncestorOf(parentName, ancestorName);
+        if (ancestorName == null) {
+            return className.equals("Object");
+        }
+
+        String parentName = node.parentName;
+
+        if (parentName != null && parentName.equals(ancestorName)) {
+            return true;
+        } else {
+            // recursively check if the ancestor is ancestor of parent
+            return isAncestorOf(parentName, ancestorName);
+        }
     }
     
 }

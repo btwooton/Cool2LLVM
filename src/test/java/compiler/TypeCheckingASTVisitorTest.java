@@ -3,11 +3,13 @@ package compiler;
 import compiler.ast.*;
 import compiler.utils.CoolTestUtils;
 import grammar.CoolParser;
+import compiler.visitors.ClassCollectorASTVisitor;
 import compiler.visitors.CoolParserToASTVisitor;
 import compiler.visitors.TypeCheckingASTVisitor;
 import compiler.semantics.Scope;
 import compiler.semantics.ClassTable;
 import compiler.semantics.ClassSymbolTable;
+import compiler.semantics.ClassSymbolTableBuilder;
 import compiler.semantics.SemanticErrorLogger;
 import java.util.HashMap;
 import java.util.Map;
@@ -243,6 +245,132 @@ public class TypeCheckingASTVisitorTest {
         assertEquals(node.getInferredType(), "error type"); 
 
         typeChecker.getLogger().printErrors();
+    }
+
+    @Test
+    public void testNewExpressionWithSelfType() {
+       // When: You parse the following new expression
+        CoolParser.ExprContext ctx = CoolTestUtils.parseExpr("new SELF_TYPE");
+        CoolParserToASTVisitor visitor = new CoolParserToASTVisitor();
+        ExprNode node = (ExprNode) visitor.visit(ctx);
+
+        // When: You then visit that node using the TypeCheckingASTVisitor
+        TypeCheckingASTVisitor typeChecker = initializeVisitorInDummyEnvironment("MyClass");
+        node.accept(typeChecker);
+
+        // Then: The logger should not have errors
+        assertFalse(typeChecker.getLogger().hasErrors());
+        
+        // Then: The inferred type of the node should be "MyClass"
+        assertEquals(node.getInferredType(), "MyClass"); 
+    }
+
+    @Test
+    public void testNewExpressionWithClassType() {
+       // When: You parse the following new expression
+        CoolParser.ExprContext ctx = CoolTestUtils.parseExpr("new Int");
+        CoolParserToASTVisitor visitor = new CoolParserToASTVisitor();
+        ExprNode node = (ExprNode) visitor.visit(ctx);
+
+        // When: You then visit that node using the TypeCheckingASTVisitor
+        TypeCheckingASTVisitor typeChecker = initializeVisitorInDummyEnvironment("MyClass");
+        node.accept(typeChecker);
+
+        // Then: The logger should not have errors
+        assertFalse(typeChecker.getLogger().hasErrors());
+        
+        // Then: The inferred type of the node should be "Int"
+        assertEquals(node.getInferredType(), "Int"); 
+    }
+
+    @Test
+    public void testArithmeticOpExpression() {
+        // When: You parse the following add expression 
+        CoolParser.ExprContext ctx = CoolTestUtils.parseExpr("10 + 5");
+        CoolParserToASTVisitor visitor = new CoolParserToASTVisitor();
+        ExprNode node = (ExprNode) visitor.visit(ctx);
+
+        // When: You then visit that node using the TypeCheckingASTVisitor
+        TypeCheckingASTVisitor typeChecker = initializeVisitorInDummyEnvironment("MyClass");
+        node.accept(typeChecker);
+
+        // Then: The logger should not have errors
+        assertFalse(typeChecker.getLogger().hasErrors());
+        
+        // Then: The inferred type of the node should be "Int"
+        assertEquals(node.getInferredType(), "Int"); 
+    }
+
+    @Test
+    public void testCompareOpExpression() {
+        // When: You parse the following add expression 
+        CoolParser.ExprContext ctx = CoolTestUtils.parseExpr("10 < 5");
+        CoolParserToASTVisitor visitor = new CoolParserToASTVisitor();
+        ExprNode node = (ExprNode) visitor.visit(ctx);
+
+        // When: You then visit that node using the TypeCheckingASTVisitor
+        TypeCheckingASTVisitor typeChecker = initializeVisitorInDummyEnvironment("MyClass");
+        node.accept(typeChecker);
+
+        // Then: The logger should not have errors
+        assertFalse(typeChecker.getLogger().hasErrors());
+        
+        // Then: The inferred type of the node should be "Int"
+        assertEquals(node.getInferredType(), "Bool"); 
+    }
+
+    @Test
+    public void testBinaryOpInvalid() {
+       // When: You parse the following add expression 
+        CoolParser.ExprContext ctx = CoolTestUtils.parseExpr("true < 5");
+        CoolParserToASTVisitor visitor = new CoolParserToASTVisitor();
+        ExprNode node = (ExprNode) visitor.visit(ctx);
+
+        // When: You then visit that node using the TypeCheckingASTVisitor
+        TypeCheckingASTVisitor typeChecker = initializeVisitorInDummyEnvironment("MyClass");
+        node.accept(typeChecker);
+
+        // Then: The logger should have errors
+        assertTrue(typeChecker.getLogger().hasErrors());
+        
+        // Then: The inferred type of the node should be ERROR_TYPE
+        assertEquals(node.getInferredType(), TypeCheckingASTVisitor.ERROR_TYPE);
+
+        typeChecker.getLogger().printErrors();
+    }
+
+    @Test
+    public void testClassWithAttributeInit() {
+        // Given: You have the following COOL program
+        String programString = (
+            "class MyClass inherits MyParent {\n" +
+            "   myAttr : MyParent <- self;\n" +
+            "};\n" +
+            "class MyParent {};"
+        );
+
+        // When: You parse it to an AST and then type check it
+        CoolParser.ProgramContext ctx = CoolTestUtils.parseProgram(programString);
+        CoolParserToASTVisitor visitor = new CoolParserToASTVisitor();
+        ASTNode node = visitor.visit(ctx);
+        SemanticErrorLogger logger = new SemanticErrorLogger();
+        ClassTable ct = new ClassTable(logger);
+        ClassCollectorASTVisitor classCollector = new ClassCollectorASTVisitor(ct);
+        node.accept(classCollector);
+        // build the Class Symbol tables
+        ClassSymbolTableBuilder ctb = new ClassSymbolTableBuilder();
+        ctb.build(ct); // build from the class table
+        // Now initialize the TypeChecker
+        TypeCheckingASTVisitor typeChecker = new TypeCheckingASTVisitor( 
+            ct,
+            ctb.getClassSymbolTables(),
+            logger
+        );
+        node.accept(typeChecker);
+
+        // Then: The logger should have no errors
+        assertFalse(logger.hasErrors());
+
     }
 
 }

@@ -6,6 +6,7 @@ import compiler.semantics.ClassSymbolTable;
 import compiler.semantics.Scope;
 import compiler.semantics.MethodInfo;
 import java.util.Map;
+import java.util.List;
 
 public class TypeCheckingASTVisitor extends BaseASTVisitor<Void> {
     public static final String BUILT_IN_METHOD_BODY_TYPE = "built in method body";
@@ -16,6 +17,37 @@ public class TypeCheckingASTVisitor extends BaseASTVisitor<Void> {
     private ClassSymbolTable currentClass;
     private Scope currentScope; 
     private SemanticErrorLogger logger;
+
+    private void logBinaryOpExprTypeError(int lineNumber, String operator, String leftType, String rightType) {
+        StringBuilder errorBuilder = new StringBuilder();
+        errorBuilder.append("Type Error: Invalid operand types for binary operator ");
+        errorBuilder.append(operator);
+        errorBuilder.append(", operands have types ");
+        errorBuilder.append(leftType + " ");
+        errorBuilder.append(" and " + rightType);
+        logger.log(lineNumber, errorBuilder.toString());
+    }
+
+    private String operatorTypeToString(BinaryOpExprNode.Op operator) {
+        switch (operator) {
+            case LT:
+                return "<";
+            case LE:
+                return "<=";
+            case EQ:
+                return "=";
+            case ADD:
+                return "+";
+            case SUB:
+                return "=";
+            case MUL:
+                return "*";
+            case DIV:
+                return "/";
+            default: 
+                return "";
+        }
+    }
 
     public TypeCheckingASTVisitor(ClassTable ct, Map<String, ClassSymbolTable> classSymbols, SemanticErrorLogger logger) {
         this.classTable = ct;
@@ -68,29 +100,48 @@ public class TypeCheckingASTVisitor extends BaseASTVisitor<Void> {
     public Void visitAttributeFeature(AttributeFeatureNode node) {
         // to visit an attribute feature, add it to the current scope
         Map<String, String> environment = currentScope.getEnvironment();
+        // handle SELF_TYPE correctly in the attributes declared type
+        String attributeType = (
+            node.featureType.equals("SELF_TYPE") ?
+            currentClass.getClassName() :
+            node.featureType
+        );
         // check if we have a child expression, if so, we need to type check it
         if (node.initExpr != null) {
+            // create a new scope that binds "self" to the current class type
+            currentScope = new Scope(currentScope);
+            currentScope.getEnvironment().put("self", currentClass.getClassName());
             node.initExpr.accept(this);
+            // pop the inner scope
+            currentScope = currentScope.getParent();
             // get the inferred type of the initialier
             String inferredInitType = node.initExpr.getInferredType();
             // check for type mismatch between the attribute and its initializer
             // log any errors if needed
-            if (!classTable.isAncestorOf(inferredInitType, node.featureType)) {
+            if (!classTable.isAncestorOf(inferredInitType, attributeType)) {
                 StringBuilder errorBuilder = new StringBuilder();
-                errorBuilder.append("Type Error: Incompatible initializer for type ");
-                errorBuilder.append(inferredInitType);
-                errorBuilder.append(" for attribute ");
+                errorBuilder.append("Type Error: Incompatible initializer for attribute ");
                 errorBuilder.append(node.featureName);
-                errorBuilder.append(" of type " + node.featureType);
+                errorBuilder.append(" of type ");
+                errorBuilder.append(attributeType);
+                errorBuilder.append("; initializer has type ");
+                errorBuilder.append(inferredInitType);
                 errorBuilder.append(" inside of class " + currentClass.getClassName());
                 logger.log( 
                     node.lineNumber,
                     errorBuilder.toString()
                 );
+                environment.put(node.featureName, ERROR_TYPE);
+                // also annotate the node itself
+                node.annotate(ERROR_TYPE);
+                return null;
             }
         }
-        // add the type association to teh current environment
+        // assuming nothing went wrong, the type of the attribute is the declared type
         environment.put(node.featureName, node.featureType);
+        // also annotate the node itself
+        node.annotate(node.featureType);
+        
         return null;
     }
 
@@ -174,6 +225,12 @@ public class TypeCheckingASTVisitor extends BaseASTVisitor<Void> {
             ((IdentifierExprNode) node).accept(this);
         } else if (node instanceof AssignExprNode) {
             ((AssignExprNode) node).accept(this);
+        } else if (node instanceof UnaryOpExprNode) {
+            ((UnaryOpExprNode) node).accept(this);
+        } else if (node instanceof BinaryOpExprNode) {
+            ((BinaryOpExprNode) node).accept(this);
+        } else if (node instanceof NewExprNode) {
+            ((NewExprNode) node).accept(this);
         }
         return null;
     }
@@ -220,10 +277,10 @@ public class TypeCheckingASTVisitor extends BaseASTVisitor<Void> {
     public Void visitUnaryOpExpr(UnaryOpExprNode node) {
         // virst visit the underling expr node
         node.expr.accept(this);
+        // get its inferred type
         String inferredExprType = node.expr.getInferredType();
-        // then our type becomes the type of the underlying node
-        node.annotate(inferredExprType);
         // then check which unary operator we are performing
+        // make sure the inferred type matches the expected type
         switch (node.operator) {
             case NOT:
                 if (!inferredExprType.equals("Bool")) {
@@ -234,6 +291,8 @@ public class TypeCheckingASTVisitor extends BaseASTVisitor<Void> {
                         " for unary operator not"
                     );
                     node.annotate(ERROR_TYPE);
+                } else { 
+                    node.annotate("Bool");
                 }
                 break;
             case COMP:
@@ -245,6 +304,8 @@ public class TypeCheckingASTVisitor extends BaseASTVisitor<Void> {
                         " for unary operator ~"
                     );
                     node.annotate(ERROR_TYPE);
+                } else {
+                    node.annotate("Int");
                 }
                 break;
         }
@@ -286,6 +347,93 @@ public class TypeCheckingASTVisitor extends BaseASTVisitor<Void> {
         // otherwise, the type of the assignment is the inferred type of its child
         node.annotate(inferredType);
 
+        return null;
+    }
+
+    @Override
+    public Void visitNewExpr(NewExprNode node) {
+        // switch on the type
+        switch (node.typeName) {
+            case "SELF_TYPE":
+                // annotate the SELF_TYPE as the type of the current class
+                node.annotate(currentClass.getClassName());
+                break;
+            default: 
+                // in all other cases, the type annotation should just be the type
+                node.annotate(node.typeName);
+                break;
+        }
+        return null;
+    }
+
+    @Override
+    public Void visitBinaryOpExpr(BinaryOpExprNode node) {
+        // to visit a binary operation, visit both of its sub expressions
+        node.left.accept(this);
+        node.right.accept(this);
+
+        // get their inferred types
+        String leftType = node.left.getInferredType();
+        String rightType = node.right.getInferredType();
+        boolean typeMismatch;
+        // now switch on the operator
+        switch (node.operator) {
+            case EQ: // equal is the oddity case, so we handle it first
+                typeMismatch = ( 
+                    (List.of("Int", "String", "Bool").contains(leftType) ||
+                    List.of("Int", "String", "Bool").contains(rightType)) && 
+                    leftType != rightType
+                );
+                if (typeMismatch) {
+                    // This is a type error, so log it and infer error type
+                    logBinaryOpExprTypeError(node.lineNumber, "=", leftType, rightType);
+                    node.annotate(ERROR_TYPE);
+                } else {
+                    // then the inferred type should be Bool
+                    node.annotate("Bool");
+                }
+                break;
+            case LT:
+            case LE: // both require int operands and infer Bool
+                typeMismatch = (
+                    !leftType.equals("Int") ||
+                    !rightType.equals("Int")
+                );
+                if (typeMismatch) {
+                    // log error and infer error type
+                    logBinaryOpExprTypeError(
+                        node.lineNumber,
+                        operatorTypeToString(node.operator),
+                        leftType,  rightType
+                    );
+                    node.annotate(ERROR_TYPE);
+                } else {
+                    node.annotate("Bool");
+                }
+                break;
+            case ADD:
+            case SUB:
+            case MUL:
+            case DIV:
+                typeMismatch = (
+                    !leftType.equals("Int") ||
+                    !rightType.equals("Int")
+                );
+                if (typeMismatch) {
+                    // log error and infer error type
+                    logBinaryOpExprTypeError(
+                        node.lineNumber,
+                        operatorTypeToString(node.operator),
+                        leftType,  rightType
+                    );
+                    node.annotate(ERROR_TYPE);
+                } else {
+                    node.annotate("Int");
+                }
+                break;
+            default: 
+                node.annotate(ERROR_TYPE);
+        }
         return null;
     }
 }
