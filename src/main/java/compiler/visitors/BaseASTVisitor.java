@@ -113,5 +113,10 @@ public class BaseASTVisitor<T> implements ASTVisitor<T> {
     public T visitNoExpr(NoExprNode node) {
         return defaultValue();
     }
+
+    @Override
+    public T visitExpr(ExprNode node) {
+        return defaultValue();
+    }
     
 }

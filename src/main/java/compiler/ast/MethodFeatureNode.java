@@ -21,6 +21,4 @@ public class MethodFeatureNode extends ASTNode {
         return visitor.visitMethodFeature(this);
     }
 
-
-    
 }

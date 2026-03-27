@@ -10,7 +10,6 @@ public class ClassCollectorASTVisitor extends BaseASTVisitor<Void> {
         this.classTable = classTable;
     }
 
-
     @Override
     public Void visitProgram(ProgramNode node) {
         // to visit a program, visit all of its classes

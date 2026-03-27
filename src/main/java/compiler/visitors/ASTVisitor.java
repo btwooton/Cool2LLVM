@@ -23,4 +23,5 @@ public interface ASTVisitor<T> {
     T visitLiteralExpr(LiteralExprNode node);
     T visitParenExpr(ParenExprNode node);
     T visitNoExpr(NoExprNode node);
+    T visitExpr(ExprNode node);
 }

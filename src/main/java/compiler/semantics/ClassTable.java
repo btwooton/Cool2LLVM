@@ -151,7 +151,25 @@ public class ClassTable {
     public String getEffectiveParent(ClassNode cls) {
         if (cls.className.equals("Object")) return null;
         return cls.parentName != null ? cls.parentName : "Object";
+    }
 
+    public boolean isAncestorOf(String className, String ancestorName) {
+        if (className == null) {
+            return false;
+        }
+        if (className == "Object" && ancestorName == null) {
+            // Special case for Object class which has no ancestor
+            return true;
+        }
+        // get the node associated with the className
+        ClassNode node = classes.get(className);
+        // get the name of the parent
+        String parentName = node.parentName;
+        if (parentName == ancestorName) {
+            return true;
+        }
+        // recursively check if the ancestor is ancestor of parent
+        return isAncestorOf(parentName, ancestorName);
     }
     
 }

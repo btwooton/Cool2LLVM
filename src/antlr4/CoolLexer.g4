@@ -24,7 +24,7 @@ OF: [oO][fF];
 NOT: [nN][oO][tT];
 TRUE: [t][rR][uU][eE]; // true and false must start with lowercase
 FALSE: [f][aA][lL][sS][eE];
-Integer : [1-9][0-9]*;
+Integer : ([0] | [1-9][0-9]*);
 TypeID: [A-Z][a-zA-Z0-9_]*;
 ID: [a-zA-Z_][a-zA-Z0-9_]*;
 Self: 'self';

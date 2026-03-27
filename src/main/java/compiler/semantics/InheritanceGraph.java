@@ -55,6 +55,10 @@ public class InheritanceGraph {
         return nodes.size();
     }
 
+    public Set<String> getChildNodes(String parentNodeName) {
+        return edges.get(parentNodeName);
+    }
+
     private boolean classInheritsFromForbidden(ClassTable ct, SemanticErrorLogger logger) {
         Set<String> forbiddenParents = Set.of("Int", "Bool", "String");
         boolean classInheritsFromForbidden = false;

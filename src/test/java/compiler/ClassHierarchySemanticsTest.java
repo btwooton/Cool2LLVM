@@ -15,7 +15,7 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 
 import org.junit.jupiter.api.Test;
 
-public class SemanticAnalysisTest {
+public class ClassHierarchySemanticsTest {
 
     @Test
     public void testSingleClassProgramClassTable() {
