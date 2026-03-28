@@ -49,6 +49,13 @@ public class TypeCheckingASTVisitor extends BaseASTVisitor<Void> {
         }
     }
 
+    private String getNormalizedType(String classType) {
+        if (classType != null && classType.equals("SELF_TYPE")) {
+            return currentClass.getClassName();
+        }
+        return classType;
+    }
+
     public TypeCheckingASTVisitor(ClassTable ct, Map<String, ClassSymbolTable> classSymbols, SemanticErrorLogger logger) {
         this.classTable = ct;
         this.classSymbols = classSymbols;
@@ -100,12 +107,8 @@ public class TypeCheckingASTVisitor extends BaseASTVisitor<Void> {
     public Void visitAttributeFeature(AttributeFeatureNode node) {
         // to visit an attribute feature, add it to the current scope
         Map<String, String> environment = currentScope.getEnvironment();
-        // handle SELF_TYPE correctly in the attributes declared type
-        String attributeType = (
-            node.featureType.equals("SELF_TYPE") ?
-            currentClass.getClassName() :
-            node.featureType
-        );
+        // handle SELF_TYPE correctly in the attribute's declared type
+        String attributeType = getNormalizedType(node.featureType);
         // check if we have a child expression, if so, we need to type check it
         if (node.initExpr != null) {
             // create a new scope that binds "self" to the current class type
@@ -138,7 +141,7 @@ public class TypeCheckingASTVisitor extends BaseASTVisitor<Void> {
             }
         }
         // assuming nothing went wrong, the type of the attribute is the declared type
-        environment.put(node.featureName, node.featureType);
+        environment.put(node.featureName, attributeType);
         // also annotate the node itself
         node.annotate(node.featureType);
         
@@ -149,6 +152,8 @@ public class TypeCheckingASTVisitor extends BaseASTVisitor<Void> {
     public Void visitMethodFeature(MethodFeatureNode node) {
         // When visiting a method, create a new scope
         currentScope = new Scope(currentScope);
+
+        // TODO: check to see if we are redefining a method that already exists in this class
 
         // Check to see if the method declaration clashes with any ancestors
         ClassSymbolTable currentAncestor = currentClass.getParentTable();
@@ -238,7 +243,7 @@ public class TypeCheckingASTVisitor extends BaseASTVisitor<Void> {
     @Override
     public Void visitIdentifierExpr(IdentifierExprNode node) {
         // check if the identifier is defined in the current scope
-        String definedType = currentScope.getDefinedType(node.name);
+        String definedType = getNormalizedType(currentScope.getDefinedType(node.name));
         // if not, we should log an error
         if (definedType == null) {
             StringBuilder errorBuilder = new StringBuilder();
@@ -317,8 +322,8 @@ public class TypeCheckingASTVisitor extends BaseASTVisitor<Void> {
         // to visit an assignment expression, first visit the underlying expression
         node.rhs.accept(this);
         // then confirm that the inferred type is compatible with that of the identifer
-        String inferredType = node.rhs.getInferredType();
-        String boundType = currentScope.getEnvironment().get(node.varName);
+        String inferredType = getNormalizedType(node.rhs.getInferredType());
+        String boundType = getNormalizedType(currentScope.getEnvironment().get(node.varName));
         // if the variable being assigned to is unbound
         // or if the types are incompatible, then infer error type for the expression
         if (boundType == null) {
@@ -352,17 +357,8 @@ public class TypeCheckingASTVisitor extends BaseASTVisitor<Void> {
 
     @Override
     public Void visitNewExpr(NewExprNode node) {
-        // switch on the type
-        switch (node.typeName) {
-            case "SELF_TYPE":
-                // annotate the SELF_TYPE as the type of the current class
-                node.annotate(currentClass.getClassName());
-                break;
-            default: 
-                // in all other cases, the type annotation should just be the type
-                node.annotate(node.typeName);
-                break;
-        }
+        // Set the type of the expression to the normalized type
+        node.annotate(getNormalizedType(node.typeName));
         return null;
     }
 
@@ -373,8 +369,8 @@ public class TypeCheckingASTVisitor extends BaseASTVisitor<Void> {
         node.right.accept(this);
 
         // get their inferred types
-        String leftType = node.left.getInferredType();
-        String rightType = node.right.getInferredType();
+        String leftType = getNormalizedType(node.left.getInferredType());
+        String rightType = getNormalizedType(node.right.getInferredType());
         boolean typeMismatch;
         // now switch on the operator
         switch (node.operator) {
@@ -433,6 +429,78 @@ public class TypeCheckingASTVisitor extends BaseASTVisitor<Void> {
                 break;
             default: 
                 node.annotate(ERROR_TYPE);
+        }
+        return null;
+    }
+
+    @Override
+    public Void visitBlockExpr(BlockExprNode node) {
+        // Then evaluate all of its sub expressions
+        for (ExprNode subExpr : node.expressions) {
+            subExpr.accept(this);
+        }
+        String inferredType = getNormalizedType(
+            node.expressions.get(node.expressions.size() - 1).getInferredType()
+        );
+        // Then infer the type of the overall block as that of the last expression
+        node.annotate(inferredType);
+        return null;
+    }
+
+    @Override
+    public Void visitConditionalExpr(ConditionalExprNode node) {
+        // to visit a conditional, visit its condition and sub expressions
+        node.condition.accept(this);
+        node.thenExpr.accept(this);
+        node.elseExpr.accept(this);
+
+        // check that the condition has inferred type Bool
+        if (!node.condition.getInferredType().equals("Bool")) {
+            // this is a type error; log it and set type to error type
+            StringBuilder errorBuilder = new StringBuilder();
+            errorBuilder.append(
+                "Type Error: If conditional must have static type 'Bool'"
+            );
+            errorBuilder.append( 
+                " but has inferred type '" + node.condition.getInferredType() + "'"
+            );
+            logger.log( 
+                node.lineNumber,
+                errorBuilder.toString()
+            );
+            node.annotate(ERROR_TYPE);
+        } else {
+            // then compute the type join of the types of the branches
+            String typeJoin = classTable.computeTypeJoin(
+                getNormalizedType(node.thenExpr.getInferredType()),
+                getNormalizedType(node.elseExpr.getInferredType())
+            );
+            // infer the type of the overall conditional as that typeJoin
+            node.annotate(typeJoin);
+        }
+        return null;
+    }
+
+    @Override
+    public Void visitLoopExpr(LoopExprNode node) {
+        // To visit a loop, visit its conditional and body
+        node.condition.accept(this);
+        node.body.accept(this);
+        // Get there inferred types
+        String conditionType = getNormalizedType(node.condition.getInferredType());
+        // make sure the type of the conditional is Bool
+        if (!conditionType.equals("Bool")) {
+            // This is a type error; log it and infer ERROR_TYPE
+            StringBuilder errorBuilder = new StringBuilder();
+            errorBuilder.append("Type Error: Loop conditional must have type 'Bool' ");
+            errorBuilder.append("but has inferred type '" + conditionType + "'");
+            logger.log( 
+                node.lineNumber,
+                errorBuilder.toString()
+            );
+            node.annotate(ERROR_TYPE);
+        } else {
+            node.annotate("Object");
         }
         return null;
     }

@@ -12,6 +12,7 @@ import compiler.semantics.InheritanceGraph;
 
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import org.junit.jupiter.api.Test;
 
@@ -242,6 +243,51 @@ public class ClassHierarchySemanticsTest {
         assertTrue(logger.hasErrors());
 
         logger.printErrors();
+
+    }
+
+    @Test
+    public void testClassTypeJoinOperation() {
+       // Given: You have the following program string with a class that inherits from Int
+        String programString = (
+            "class MyClass inherits MyParent {\n" +
+            "   myAttr : Int <- 42;\n" +
+            "   myMethod(x : Int, y : Bool) : String {\n" +
+            "       if y then \"yes\" else \"no\" fi\n" +
+            "   };\n" +
+            "};\n" +
+            "class MyParent inherits MyGrandParent {};\n" +
+            "class MyGrandParent {};\n" +
+            "class MyOtherClass inherits MyOtherParent {};\n" +
+            "class MyOtherParent inherits MyGrandParent {};\n" +
+            "class MySibling inherits MyParent {};\n" +
+            "class MyStranger {};\n"
+        );
+        // When: You parse the program to an AST and visit it with the ClassCollectorASTVisitor
+        CoolParser.ProgramContext ctx = CoolTestUtils.parseProgram(programString);
+        CoolParserToASTVisitor visitor = new CoolParserToASTVisitor();
+        ASTNode node = visitor.visit(ctx);
+        SemanticErrorLogger logger = new SemanticErrorLogger();
+        ClassTable ct = new ClassTable(logger);
+        ClassCollectorASTVisitor classCollector = new ClassCollectorASTVisitor(ct);
+        node.accept(classCollector);
+        
+        // When: You then build an inheritance graph from the ClassTable
+        InheritanceGraphBuilder igb = new InheritanceGraphBuilder();
+        igb.buildFromClassTable(ct);
+        InheritanceGraph ig = igb.getInheritanceGraph();
+
+        // Then: The inheritance graph should be well formed
+        assertTrue(ig.isWellFormed(ct, logger));
+        // Then : The logger should not have errors
+        assertFalse(logger.hasErrors());
+        String typeJoin = ct.computeTypeJoin("MyParent", "MyOtherClass");
+        String typeJoin2 = ct.computeTypeJoin("MyClass", "MyOtherClass");
+        // Then: The type joins should be as expected
+        assertEquals(typeJoin, "MyGrandParent");
+        assertEquals(typeJoin2, "MyGrandParent");
+        assertEquals(ct.computeTypeJoin("MyClass", "MySibling"), "MyParent");
+        assertEquals(ct.computeTypeJoin("MyClass", "MyStranger"), "Object");
 
     }
 

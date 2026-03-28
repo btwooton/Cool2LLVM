@@ -340,6 +340,84 @@ public class TypeCheckingASTVisitorTest {
     }
 
     @Test
+    public void testBlockExpr() {
+        // Given: You parse the following block expression
+        CoolParser.ExprContext ctx = CoolTestUtils.parseExpr("{ 5 + 5; a <- new MyClass; 5 < 10; }");
+        CoolParserToASTVisitor visitor = new CoolParserToASTVisitor();
+        ExprNode node = (ExprNode) visitor.visit(ctx);
+
+        // When: You then visit that node using the TypeCheckingASTVisitor
+        Scope dummyScope = new Scope(null);
+        dummyScope.getEnvironment().put("a", "MyClass");
+        TypeCheckingASTVisitor typeChecker = initializeVisitorWithDummyScope("MyClass", dummyScope);
+        node.accept(typeChecker);
+
+        // Then: The logger should have no errors
+        assertFalse(typeChecker.getLogger().hasErrors());
+        
+        // Then: The inferred type of the node should be Bool
+        assertEquals(node.getInferredType(), "Bool");
+    }
+
+    @Test
+    public void testConditional() {
+        // Given: You parse the following conditional expression
+        CoolParser.ExprContext ctx = CoolTestUtils.parseExpr("if 5 < 10 then \"Hello\" else new MyClass fi");
+        CoolParserToASTVisitor visitor = new CoolParserToASTVisitor();
+        ExprNode node = (ExprNode) visitor.visit(ctx);
+
+        // When: You then visit that node using the TypeCheckingASTVisitor
+        TypeCheckingASTVisitor typeChecker = initializeVisitorInDummyEnvironment("MyClass");
+        node.accept(typeChecker);
+
+        // Then: The logger should have no errors
+        assertFalse(typeChecker.getLogger().hasErrors());
+        
+        // Then: The inferred type of the node should be Object
+        assertEquals(node.getInferredType(), "Object");
+    }
+
+    @Test
+    public void testConditionalWithBadCondition() {
+        // Given: You parse the following conditional expression
+        CoolParser.ExprContext ctx = CoolTestUtils.parseExpr("if 5 + 10 then \"Hello\" else new MyClass fi");
+        CoolParserToASTVisitor visitor = new CoolParserToASTVisitor();
+        ExprNode node = (ExprNode) visitor.visit(ctx);
+
+        // When: You then visit that node using the TypeCheckingASTVisitor
+        TypeCheckingASTVisitor typeChecker = initializeVisitorInDummyEnvironment("MyClass");
+        node.accept(typeChecker);
+
+        // Then: The logger should have errors
+        assertTrue(typeChecker.getLogger().hasErrors());
+        
+        // Then: The inferred type of the node should be ERROR_TYPE
+        assertEquals(node.getInferredType(), TypeCheckingASTVisitor.ERROR_TYPE); 
+
+        typeChecker.getLogger().printErrors();
+    }
+
+    @Test 
+    public void testLoopExpression() {
+       // Given: You parse the following loop expression
+        CoolParser.ExprContext ctx = CoolTestUtils.parseExpr("while x < 10 loop x <- x + 1 pool\"");
+        CoolParserToASTVisitor visitor = new CoolParserToASTVisitor();
+        ExprNode node = (ExprNode) visitor.visit(ctx);
+
+        // When: You then visit that node using the TypeCheckingASTVisitor
+        Scope dummyScope = new Scope(null);
+        dummyScope.getEnvironment().put("x", "Int");
+        TypeCheckingASTVisitor typeChecker = initializeVisitorWithDummyScope("MyClass", dummyScope);
+        node.accept(typeChecker);
+
+        // Then: The logger should not have errors
+        assertFalse(typeChecker.getLogger().hasErrors());
+        
+        // Then: The inferred type of the node should be Object
+        assertEquals(node.getInferredType(), "Object"); 
+    }
+
+    @Test
     public void testClassWithAttributeInit() {
         // Given: You have the following COOL program
         String programString = (
@@ -370,7 +448,6 @@ public class TypeCheckingASTVisitorTest {
 
         // Then: The logger should have no errors
         assertFalse(logger.hasErrors());
-
     }
 
 }

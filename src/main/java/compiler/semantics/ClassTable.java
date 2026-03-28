@@ -153,6 +153,30 @@ public class ClassTable {
         return cls.parentName != null ? cls.parentName : "Object";
     }
 
+    public String computeTypeJoin(String classType1, String classType2) {
+        // check for trivial cases
+        if (classType1.equals(classType2)) {
+            return classType1;
+        } else if (isAncestorOf(classType1, classType2)) {
+            return classType2;
+        } else if (isAncestorOf(classType2, classType1)) {
+            return classType1;
+        }
+
+        // otherwise, walk up the inheritance hierarchy to find common ancestor
+        boolean foundCommonAncestor = false;
+        String currentLevel = classType1;
+        while (!foundCommonAncestor) {
+            // walk up to the next parent
+            currentLevel = getEffectiveParent(classes.get(currentLevel)); 
+            // check if the currentLevel is an ancestor of the right-side class
+            foundCommonAncestor = isAncestorOf(classType2, currentLevel);
+        }
+        // return the currentLevel as the common ancestor
+        return currentLevel;
+
+    }
+
     public boolean isAncestorOf(String className, String ancestorName) {
         if (className == null) {
             return false;
@@ -170,7 +194,7 @@ public class ClassTable {
             return className.equals("Object");
         }
 
-        String parentName = node.parentName;
+        String parentName = getEffectiveParent(node);
 
         if (parentName != null && parentName.equals(ancestorName)) {
             return true;
